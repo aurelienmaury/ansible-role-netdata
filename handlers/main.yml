@@ -1,0 +1,7 @@
+---
+
+- name: restart netdata
+  service:
+    name: netdata
+    enabled: yes
+    state: restarted

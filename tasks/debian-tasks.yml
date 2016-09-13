@@ -43,6 +43,13 @@
     chdir: /usr/src/netdata
     creates: /etc/netdata/netdata.conf
 
+- lineinfile:
+    dest: "/etc/netdata/netdata.conf"
+    regexp: ".*bind to =.*"
+    line: "        bind to = 127.0.0.1"
+    insertafter: "[global]"
+  notify: restart netdata
+
 - copy:
     src: /usr/src/netdata/system/netdata.service
     dest: /etc/systemd/system/netdata.service
