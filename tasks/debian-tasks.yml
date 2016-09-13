@@ -50,9 +50,13 @@
     owner: root
     group: root
     mode: 0644
+  register: service_file
 
-- systemd:
-    daemon_reload: yes
+- shell: >-
+    systemctl daemon-reload
+  when: service_file|changed
+
+- service:
     name: netdata
     enabled: yes
     state: started
