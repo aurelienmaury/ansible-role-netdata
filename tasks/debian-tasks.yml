@@ -45,9 +45,16 @@
 
 - lineinfile:
     dest: "/etc/netdata/netdata.conf"
-    regexp: ".*bind to =.*"
-    line: "        bind to = 127.0.0.1"
+    regexp: ".*{{ item.key }} =.*"
+    line: "        {{ item.key }} = {{ item.value }}"
     insertafter: "[global]"
+  with_items:
+    - key: "bind to"
+      value: "127.0.0.1"
+    - key: "update every"
+      value: "2"
+    - key: "history"
+      value: "3600"
   notify: restart netdata
 
 - copy:
