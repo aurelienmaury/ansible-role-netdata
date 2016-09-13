@@ -1,0 +1,12 @@
+---
+netdata_info:
+  author: Aurélien Maury
+  description: Netdata monitoring
+  license: GPLv3
+  min_ansible_version: 2.0
+  platforms:
+    - name: Debian
+      versions:
+        - jessie
+
+dependencies: []
