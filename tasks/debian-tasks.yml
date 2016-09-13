@@ -1,0 +1,58 @@
+---
+- apt_key:
+    url="https://deb.nodesource.com/gpgkey/nodesource.gpg.key"
+    state=present
+
+- apt_repository:
+    repo="{{ item }}"
+    state=present
+    update_cache=yes
+  with_items:
+    - "deb https://deb.nodesource.com/node_4.x {{ ansible_distribution_release }} main"
+    - "deb-src https://deb.nodesource.com/node_4.x {{ ansible_distribution_release }} main"
+
+- name: "Install pre-requisites"
+  apt:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - autoconf
+    - autoconf-archive
+    - autogen
+    - automake
+    - gcc
+    - git
+    - libmnl-dev
+    - make
+    - pkg-config
+    - uuid-dev
+    - zlib1g-dev
+    - nodejs
+
+- name: "Clone repo"
+  git:
+    clone: yes
+    repo: https://github.com/firehol/netdata.git
+    dest: /usr/src/netdata
+
+- name: "Installation"
+  shell: ./netdata-installer.sh --dont-wait --libs-are-really-here
+  args:
+    chdir: /usr/src/netdata
+    creates: /etc/netdata/netdata.conf
+
+- shell: killall netdata
+
+- copy:
+    src: /usr/src/netdata/system/netdata.service
+    dest: /etc/systemd/system/netdata.service
+    remote_src: yes
+    owner: root
+    group: root
+    mode: 0644
+
+- systemd:
+    daemon_reload: yes
+    name: netdata
+    enabled: yes
+    state: started
