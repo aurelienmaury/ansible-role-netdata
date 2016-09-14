@@ -1,17 +1,19 @@
 ---
-- apt_key:
-    url="https://deb.nodesource.com/gpgkey/nodesource.gpg.key"
-    state=present
+- name: Adding nodesource apt signing key
+  apt_key:
+    url: "https://deb.nodesource.com/gpgkey/nodesource.gpg.key"
+    state: present
 
-- apt_repository:
-    repo="{{ item }}"
-    state=present
-    update_cache=yes
+- name: Adding nodesource apt repositories
+  apt_repository:
+    repo: "{{ item }}"
+    state: present
+    update_cache: yes
   with_items:
     - "deb https://deb.nodesource.com/node_4.x {{ ansible_distribution_release }} main"
     - "deb-src https://deb.nodesource.com/node_4.x {{ ansible_distribution_release }} main"
 
-- name: "Install pre-requisites"
+- name: Installing required packages
   apt:
     name: "{{ item }}"
     state: present
@@ -29,13 +31,13 @@
     - zlib1g-dev
     - nodejs
 
-- name: "Clone repo"
+- name: Cloning netdata repository
   git:
     clone: yes
     repo: https://github.com/firehol/netdata.git
     dest: /usr/src/netdata
 
-- name: "Installation"
+- name: Installation
   shell: >-
     ./netdata-installer.sh --dont-wait --libs-are-really-here
     && ps -u netdata | grep -v PID | sed 's/\([0-9]*\) .*/\1/g' | head -n 1 | xargs kill
@@ -43,7 +45,8 @@
     chdir: /usr/src/netdata
     creates: /etc/netdata/netdata.conf
 
-- lineinfile:
+- name: Fine-tuning netdata configuration
+  lineinfile:
     dest: "/etc/netdata/netdata.conf"
     regexp: ".*{{ item.key }} =.*"
     line: "        {{ item.key }} = {{ item.value }}"
@@ -57,7 +60,8 @@
       value: "3600"
   notify: restart netdata
 
-- copy:
+- name: Putting systemd configuration in place
+  copy:
     src: /usr/src/netdata/system/netdata.service
     dest: /etc/systemd/system/netdata.service
     remote_src: yes
@@ -66,11 +70,13 @@
     mode: 0644
   register: service_file
 
-- shell: >-
+- name: Reloading systemd
+  shell: >-
     systemctl daemon-reload
   when: service_file|changed
 
-- service:
+- name: Enabling service
+  service:
     name: netdata
     enabled: yes
     state: started
