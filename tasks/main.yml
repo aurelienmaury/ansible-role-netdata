@@ -1,3 +1,10 @@
 ---
 - include: debian-tasks.yml
   when: ansible_os_family == "Debian"
+
+- name: include any specific tasks if needed
+  include: "{{ item }}"
+  with_first_found:
+    - files:
+        - "{{ ansible_lsb.id|lower }}_{{ ansible_major_version }}-tasks.yml"
+      skip: true

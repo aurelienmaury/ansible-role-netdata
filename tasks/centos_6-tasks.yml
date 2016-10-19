@@ -1,0 +1,68 @@
+---
+# centos 6 specific tasks file for netdata
+- get_url:
+    url: "https://rpm.nodesource.com/pub_4.x/el/6/x86_64/nodesource-release-el6-1.noarch.rpm"
+    dest: "/var/cache/yum/nodesource-release-el6-1.noarch.rpm"
+    checksum: "sha256:6815ee868b20af31d79390ccebd42e91e6cc92b976020023e08532b0c1e4b24e"
+
+- yum:
+    name: "/var/cache/yum/nodesource-release-el6-1.noarch.rpm"
+    state: present
+    update_cache: yes
+
+- yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - zlib-devel
+    - zlib
+    - libmnl
+    - libmnl-devel
+    - gcc-c++
+    - make
+    - nodejs
+
+- name: Cloning netdata repository
+  git:
+    repo: https://github.com/firehol/netdata.git
+    dest: /usr/src/netdata
+    clone: yes
+
+- name: Installation
+  shell: >-
+    ./netdata-installer.sh --dont-wait --libs-are-really-here
+    && ps -u netdata | grep -v PID | sed 's/\([0-9]*\) .*/\1/g' | head -n 1 | xargs kill
+  args:
+    chdir: /usr/src/netdata
+    creates: /etc/netdata/netdata.conf
+
+- name: Fine-tuning netdata configuration
+  lineinfile:
+    dest: "/etc/netdata/netdata.conf"
+    regexp: ".*{{ item.key }} =.*"
+    line: "        {{ item.key }} = {{ item.value }}"
+    insertafter: "[global]"
+  with_items:
+    - key: "bind to"
+      value: "127.0.0.1"
+    - key: "update every"
+      value: "2"
+    - key: "history"
+      value: "3600"
+  notify: restart netdata
+
+- name: Putting init script in place
+  copy:
+    src: /usr/src/netdata/system/netdata-lsb
+    dest: /etc/init.d/netdata
+    remote_src: yes
+    owner: root
+    group: root
+    mode: 0744
+  register: service_file
+
+- name: Enabling service
+  service:
+    name: netdata
+    enabled: yes
+    state: started
