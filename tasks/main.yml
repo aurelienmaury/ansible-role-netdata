@@ -1,4 +1,6 @@
 ---
+- debug:
+    msg: "Scope {{ ansible_os_family|lower }}_{{ ansible_major_version }}"
 - include: debian-tasks.yml
   when: ansible_os_family == "Debian"
 
