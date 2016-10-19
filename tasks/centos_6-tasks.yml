@@ -33,7 +33,7 @@
 - name: Installation
   shell: >-
     ./netdata-installer.sh --dont-wait --libs-are-really-here
-    && ps -u netdata | grep -v PID | sed 's/\([0-9]*\) .*/\1/g' | head -n 1 | xargs kill
+    && ps -u netdata | grep -v PID | sed 's/ *\([0-9]*\) .*/\1/g' | head -n 1 | xargs kill
   args:
     chdir: /usr/src/netdata
     creates: /etc/netdata/netdata.conf
