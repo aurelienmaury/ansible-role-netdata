@@ -1,6 +1,7 @@
 ---
 - debug:
-    msg: "Scope {{ ansible_os_family|lower }}_{{ ansible_distribution_major_version }}"
+    msg: "Scope {{ ansible_distribution|lower }}_{{ ansible_distribution_major_version }}"
+    
 - include: debian-tasks.yml
   when: ansible_os_family == "Debian"
 
@@ -8,5 +9,5 @@
   include: "{{ item }}"
   with_first_found:
     - files:
-        - "{{ ansible_os_family|lower }}_{{ ansible_distribution_major_version }}-tasks.yml"
+        - "{{ ansible_distribution|lower }}_{{ ansible_distribution_major_version }}-tasks.yml"
       skip: true
