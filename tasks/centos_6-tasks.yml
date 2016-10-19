@@ -22,7 +22,7 @@
     - make
     - nodejs
 
-- name: Cloning netdata repository
+- name: cloning netdata repository
   git:
     repo: https://github.com/firehol/netdata.git
     dest: /usr/src/netdata

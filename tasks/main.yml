@@ -6,5 +6,5 @@
   include: "{{ item }}"
   with_first_found:
     - files:
-        - "{{ ansible_lsb.id|lower }}_{{ ansible_major_version }}-tasks.yml"
+        - "{{ ansible_os_family|lower }}_{{ ansible_major_version }}-tasks.yml"
       skip: true
