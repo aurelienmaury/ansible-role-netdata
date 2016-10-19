@@ -18,6 +18,8 @@
     - zlib
     - libmnl
     - libmnl-devel
+    - libuuid
+    - libuuid-devel
     - gcc-c++
     - make
     - nodejs
